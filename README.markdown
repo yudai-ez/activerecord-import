@@ -1,27 +1,27 @@
 # activerecord-import
 
-activerecord-import is a library for bulk inserting data using ActiveRecord.
+activerecord-import is a library for bulk inserting data using ActiveRecord. **It is known for reducing the insertion of data from hours, days, and weeks down to minutes or less.**
 
-One of its major features is following activerecord associations and generating the minimal
-number of SQL insert statements required, avoiding the N+1 insert problem. An example probably
-explains it best. Say you had a schema like this:
- 
-Publishers have Books
-Books have Reviews
- 
-and you wanted to bulk insert 100 new publishers with 10K books and 3 reviews per book. This library will follow the associations
-down and generate only 3 SQL insert statements - one for the publishers, one for the books, and one for the reviews.
- 
-In contrast, the standard ActiveRecord save would generate
-100 insert statements for the publishers, then it would visit each publisher and save all the books:
-100 * 10,000 = 1,000,000 SQL insert statements
-and then the reviews:
-100 * 10,000 * 3 = 3M SQL insert statements,
- 
-That would be about 4M SQL insert statements vs 3, which results in vastly improved performance. In our case, it converted
-an 18 hour batch process to <2 hrs.
+## How does it do it (at a glance)
 
-### Rails 4.0
+One major feature of activerecord-import is following activerecord associations and generating the minimal number of SQL insert statements required, avoiding the N+1 insert problem.
+
+### From millions of INSERTs to three
+
+An example probably explains it best. Let's say you have a schema like this:
+
+* Publishers have Books
+* Books have Reviews
+
+And you wanted to bulk insert 100 new publishers with 10K books and 3 reviews per book. This library will follow the associations down and generate the minimum number of insert statements in order to do this. It may be as few as 3 SQL insert statements: one for the publishers, one for the books, and one for the reviews.
+
+In contrast, the standard ActiveRecord save would generate 100 insert statements for the publishers, then it would visit each publisher and save all the books.
+
+That's 1,000,000 SQL insert statements (100 publishers * 10,000 books) just for books! If you still want to insert reviews you'll ened up with 3,000,000 SQL insert statements (100 publishers * 10,000 books * 3 reviews)!
+
+In total, that would be about 4M SQL insert statements vs 3. This results in activerecord-import having vastly improved performance over just using ActiveRecord. In our case, it converted an 18 hour batch process to <2 hrs.
+
+### Rails 4.0, 4.1, and higher
 
 Use activerecord-import 0.4.0 or higher.
 
@@ -54,7 +54,7 @@ To understand how rubygems loads code you can reference the following:
   http://guides.rubygems.org/patterns/#loading_code
 
 And an example of how active_record dynamically load adapters:
-  https://github.com/rails/rails/blob/master/activerecord/lib/active_record/connection_adapters/connection_specification.rb 
+  https://github.com/rails/rails/blob/master/activerecord/lib/active_record/connection_adapters/connection_specification.rb
 
 In summary, when a gem is loaded rubygems adds the `lib` folder of the gem to the global load path `$LOAD_PATH` so that all `require` lookups will not propegate through all of the folders on the load path. When a `require` is issued each folder on the `$LOAD_PATH` is checked for the file and/or folder referenced. This allows a gem (like activerecord-import) to define push the activerecord-import folder (or namespace) on the `$LOAD_PATH` and any adapters provided by activerecord-import will be found by rubygems when the require is issued.
 
@@ -77,7 +77,7 @@ When rubygems pushes the `lib` folder onto the load path a `require` will now fi
 
 # License
 
-This is licensed under the ruby license. 
+This is licensed under the ruby license.
 
 # Author
 
@@ -85,11 +85,13 @@ Zach Dennis (zach.dennis@gmail.com)
 
 # Contributors
 
+* John Naegle
+* Robert Mathews
 * Blythe Dunham
 * Gabe da Silveira
 * Henry Work
 * James Herdman
 * Marcus Crafter
 * Thibaud Guillaume-Gentil
-* Mark Van Holstyn 
+* Mark Van Holstyn
 * Victor Costan
